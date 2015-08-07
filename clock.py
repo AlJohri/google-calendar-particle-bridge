@@ -30,7 +30,7 @@ def refresh_calendar_list():
     global calendar_list
     calendar_list = requests.get("https://www.googleapis.com/calendar/v3/users/me/calendarList?access_token=%s" % access_token).json()['items']
 
-est = tz.gettz('America/New York')
+est = dateutil.tz.gettz('America/New York')
 
 def process_calendar(calendar):
     print(calendar['id'])
@@ -47,13 +47,13 @@ def process_calendar(calendar):
     calendar_response = requests.get("https://www.googleapis.com/calendar/v3/calendars/primary/events?access_token=%s" % access_token, params=calendar_payload).json()['items']
 
     current_event = calendar_response[0]
-    start_time = dateutil.parser.parse(current_event['start']['dateTime'], ignoretz=True).astimezone(est)
+    start_time = dateutil.parser.parse(current_event['start']['dateTime'], ignoretz=True).replace(tzinfo=est)
 
-    if start_time > datetime.datetime.now().astimezone(est):
+    if start_time > datetime.datetime.now().replace(tzinfo=est):
         text2send = "no current events"
     else:
-        end_time = dateutil.parser.parse(current_event['end']['dateTime'], ignoretz=True).astimezone(est)
-        delta = end_time - datetime.datetime.now()
+        end_time = dateutil.parser.parse(current_event['end']['dateTime'], ignoretz=True).replace(tzinfo=est)
+        delta = end_time - datetime.datetime.now().replace(tzinfo=est)
         text2send = current_event['summary'] + '|-|-|' + "%f minutes" % (delta.seconds / 60)
 
     return text2send
