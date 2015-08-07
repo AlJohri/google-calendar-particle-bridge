@@ -14,6 +14,8 @@ python clock.py
 ## Deploy
 
 ```
+# put all environment variables from .secret on heroku
+heroku config:add TZ="America/New_York"
 heroku ps:scale clock=1
 ```
 
