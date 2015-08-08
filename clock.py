@@ -75,7 +75,8 @@ def post_to_sparkcore(text2send):
         "ttl": 0
     }
 
-    requests.post("https://api.particle.io/v1/devices/events", data=sparkcore_payload)
+    resp = requests.post("https://api.particle.io/v1/devices/events", data=sparkcore_payload)
+    print resp
 
 @sched.scheduled_job('interval', minutes=1)
 def process_all_calendars():
