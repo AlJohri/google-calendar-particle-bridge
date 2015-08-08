@@ -21,7 +21,6 @@ def refresh_access_token():
     }
 
     credentials_response = requests.post("https://www.googleapis.com/oauth2/v3/token", data=credentials_payload).json()
-
     access_token = credentials_response['access_token']
     expires_in = credentials_response['expires_in']
 
@@ -45,12 +44,21 @@ def process_calendar(calendar):
     }
 
     calendar_response = requests.get("https://www.googleapis.com/calendar/v3/calendars/primary/events?access_token=%s" % access_token, params=calendar_payload).json()['items']
+    
+    # skip if no event
+    if len(calendar_response) == 0:
+        return None
 
     current_event = calendar_response[0]
+    
+    # skip all day events
+    if current_event['start'].get('dateTime') == None:
+        return None
+
     start_time = dateutil.parser.parse(current_event['start']['dateTime'], ignoretz=True).replace(tzinfo=est)
 
     if start_time > datetime.datetime.now().replace(tzinfo=est):
-        text2send = "no current events"
+        return None
     else:
         end_time = dateutil.parser.parse(current_event['end']['dateTime'], ignoretz=True).replace(tzinfo=est)
         delta = end_time - datetime.datetime.now().replace(tzinfo=est)
@@ -71,11 +79,17 @@ def post_to_sparkcore(text2send):
 
 @sched.scheduled_job('interval', minutes=1)
 def process_all_calendars():
+    texts = []
     for calendar in calendar_list:
         if calendar['accessRole'] != "owner": continue
-        text2send = process_calendar(calendar)
-        print(text2send)
-        post_to_sparkcore(text2send)
+        text = process_calendar(calendar)
+        if text == None: continue
+        texts.append(process_calendar(calendar))
+    
+    if len(texts) != 0:
+        print "\n\n\n\n\n"
+        print(texts[0])
+        post_to_sparkcore(texts[0])
 
 if __name__ == '__main__':
 
