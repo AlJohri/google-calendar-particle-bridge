@@ -44,16 +44,14 @@ def process_calendar(calendar):
     }
 
     calendar_response = requests.get("https://www.googleapis.com/calendar/v3/calendars/primary/events?access_token=%s" % access_token, params=calendar_payload).json()['items']
-    
+
     # skip if no event
-    if len(calendar_response) == 0:
-        return None
+    if len(calendar_response) == 0: return None
 
     current_event = calendar_response[0]
-    
+
     # skip all day events
-    if current_event['start'].get('dateTime') == None:
-        return None
+    if current_event['start'].get('dateTime') == None: return None
 
     start_time = dateutil.parser.parse(current_event['start']['dateTime'], ignoretz=True).replace(tzinfo=est)
 
@@ -76,21 +74,24 @@ def post_to_sparkcore(text2send):
     }
 
     resp = requests.post("https://api.particle.io/v1/devices/events", data=sparkcore_payload)
-    print resp
 
 @sched.scheduled_job('interval', minutes=1)
 def process_all_calendars():
+
     texts = []
+
     for calendar in calendar_list:
         if calendar['accessRole'] != "owner": continue
         text = process_calendar(calendar)
-        if text == None: continue
+        if text == None:
+            print "skipping calendar due to either no event or all day event"
+            continue
         texts.append(process_calendar(calendar))
-    
-    if len(texts) != 0:
-        print "\n\n\n\n\n"
-        print(texts[0])
-        post_to_sparkcore(texts[0])
+
+    for text in texts:
+        print "--------------------"
+        print(text)
+        post_to_sparkcore(text)
 
 if __name__ == '__main__':
 
