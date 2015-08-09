@@ -1,6 +1,6 @@
-# Google Calendar SparkCore Bridge
+# Google Calendar Particle Bridge
 
-Streams the current event on all Google Calendar's associated with one account to a SparkCore.
+Streams the current event on all Google Calendar's associated with one account to any Particle device (Photon, Electron, etc.).
 
 ## Setup
 ```
@@ -15,6 +15,7 @@ python clock.py
 
 ```
 # put all environment variables from .secret on heroku
+heroku config:set GOOGLE_REFRESH_TOKEN="xyz" GOOGLE_CLIENT_ID="xyz" GOOGLE_CLIENT_SECRET="xyz" PARTICLE_ACCESS_TOKEN="xyz"
 heroku config:add TZ="America/New_York"
 heroku ps:scale clock=1
 ```
