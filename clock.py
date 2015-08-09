@@ -64,16 +64,16 @@ def process_calendar(calendar):
 
     return text2send
 
-def post_to_sparkcore(text2send):
-    sparkcore_payload = {
-        "access_token": os.getenv('SPARKCORE_ACCESS_TOKEN'),
+def post_to_particle(text2send):
+    particle_payload = {
+        "access_token": os.getenv('PARTICLE_ACCESS_TOKEN'),
         "name": "calevents",
         "data": text2send,
         "private": "false",
         "ttl": 0
     }
 
-    resp = requests.post("https://api.particle.io/v1/devices/events", data=sparkcore_payload)
+    resp = requests.post("https://api.particle.io/v1/devices/events", data=particle_payload)
 
 @sched.scheduled_job('interval', minutes=1)
 def process_all_calendars():
@@ -91,7 +91,7 @@ def process_all_calendars():
     for text in texts:
         print "--------------------"
         print(text)
-        post_to_sparkcore(text)
+        post_to_particle(text)
 
 if __name__ == '__main__':
 
